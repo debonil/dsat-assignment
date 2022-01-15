@@ -9,7 +9,10 @@ struct Heap
     int *refArr;
     int size;
 };
-
+int heapComp(int a, int b)
+{
+    return a > b;
+}
 struct Heap *createHeap(int maxSize)
 {
     struct Heap *heap = (struct Heap *)malloc(sizeof(struct Heap));
@@ -24,12 +27,12 @@ void swap(int *a, int *b)
     *b = c;
 }
 int parent(int i) { return (i - 1) / 2; }
-int lChild(int i) { return i * 2; }
-int rChild(int i) { return i * 2 + 1; }
+int lChild(int i) { return i * 2 + 1; }
+int rChild(int i) { return i * 2 + 2; }
 
 void heapifyUp(struct Heap *heap, int i)
 {
-    if (heap->refArr[parent(i)] > heap->refArr[i])
+    if (heapComp(heap->refArr[parent(i)], heap->refArr[i]))
     {
         swap(&heap->refArr[parent(i)], &heap->refArr[i]);
         heapifyUp(heap, parent(i));
@@ -38,10 +41,22 @@ void heapifyUp(struct Heap *heap, int i)
 
 void heapifyDown(struct Heap *heap, int i)
 {
-    if (heap->refArr[parent(i)] > heap->refArr[i])
+    int l = lChild(i);
+    int r = rChild(i);
+    int best = i;
+
+    if (l < heap->size && l > -1 && !heapComp(heap->refArr[l], heap->refArr[best]))
     {
-        swap(&heap->refArr[parent(i)], &heap->refArr[i]);
-        heapifyUp(heap, parent(i));
+        best = l;
+    }
+    if (r < heap->size && r > -1 && !heapComp(heap->refArr[r], heap->refArr[best]))
+    {
+        best = r;
+    }
+    if (best != i)
+    {
+        swap(&heap->refArr[best], &heap->refArr[i]);
+        heapifyDown(heap, best);
     }
 }
 
@@ -80,6 +95,20 @@ int main()
 {
     int option = -1, tmp;
     struct Heap *heap = createHeap(25);
+    //for test
+    addToHeap(heap, 50);
+    addToHeap(heap, 60);
+    addToHeap(heap, 40);
+    addToHeap(heap, 70);
+    addToHeap(heap, 80);
+    addToHeap(heap, 90);
+    addToHeap(heap, 30);
+    addToHeap(heap, 45);
+    addToHeap(heap, 65);
+    addToHeap(heap, 75);
+    addToHeap(heap, 95);
+    addToHeap(heap, 35);
+    ;
     while (option != 0)
     {
         printf("\nEnter \n 1. to Insert \n 2. to Delete Min \n 3. to See All\n 0. to Exit\n");
