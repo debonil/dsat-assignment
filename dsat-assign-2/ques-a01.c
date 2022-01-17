@@ -26,6 +26,6 @@ int main()
         scanf("%d", &arr[i]);
     }
     scanf("%d", &k);
-    printf("%d", linearSearch(n, arr, k));
+    printf("%d\n", linearSearch(n, arr, k));
     return 0;
 }
