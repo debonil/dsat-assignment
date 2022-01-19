@@ -15,7 +15,7 @@ int binarySearch(int n, int *arr, int k)
     {
         mid = (lo + hi) / 2;
         if (arr[mid] == k)
-            return mid;
+            return 1; // mid;
         else if (arr[mid] < k)
             lo = mid + 1;
         else
@@ -23,6 +23,19 @@ int binarySearch(int n, int *arr, int k)
     }
 
     return -1;
+}
+void insertionSort(int *arr, int n)
+{
+    for (int i = 1; i < n; i++)
+    {
+        int k = arr[i], j = i - 1;
+        while (j > -1 && arr[j] > k)
+        {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = k;
+    }
 }
 
 int main()
@@ -35,7 +48,7 @@ int main()
         scanf("%d", &arr[i]);
     }
     scanf("%d", &k);
-    // assuming entered array is sorted
+    insertionSort(arr, n);
     printf("%d\n", binarySearch(n, arr, k));
     return 0;
 }
