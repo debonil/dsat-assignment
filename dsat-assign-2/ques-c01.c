@@ -10,22 +10,31 @@ the new and original length. Find the minimum total cost?
 #include <stdio.h>
 #include <stdlib.h>
 
+void sort(int *arr, int n)
+{
+    for (int i = 1; i < n; i++)
+    {
+        int k = arr[i], j = i - 1;
+        while (j > -1 && arr[j] > k)
+        {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = k;
+    }
+}
+
 int main()
 {
-    int n, *arr, sum = 0, avg = 0;
+    int n, *arr, sum = 0, med = 0;
     scanf("%d", &n);
     arr = (int *)calloc(n, sizeof(int));
     for (int i = 0; i < n; i++)
-    {
         scanf("%d", &arr[i]);
-        sum += arr[i];
-    }
-    avg = sum / n;
-    sum = 0;
+    sort(arr, n);
+    med = n % 2 ? arr[n / 2] : (arr[n / 2] + arr[n / 2 - 1]) / 2;
     for (int i = 0; i < n; i++)
-    {
-        sum += arr[i] > avg ? arr[i] - avg : avg - arr[i];
-    }
+        sum += arr[i] > med ? arr[i] - med : med - arr[i];
     printf("%d \n", sum);
     return 0;
 }
