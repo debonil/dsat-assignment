@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "vector": "c"
+        "vector": "c",
+        "*.tcc": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "string_view": "c",
+        "queue.h": "c"
     }
 }
