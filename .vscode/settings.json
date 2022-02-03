@@ -2,6 +2,7 @@
     "files.associations": {
         "string": "c",
         "tree.h": "c",
-        "*.zip": "c"
+        "*.zip": "c",
+        "stdlib.h": "c"
     }
 }
