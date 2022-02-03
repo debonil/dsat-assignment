@@ -26,8 +26,8 @@ static const char BI_DIR_OPS[] = "~&|";
 static const char UNI_DIR_OPS[] = ">";
 static const char UNIARY_OPS[] = "!";
 
-static char PAREN_OPEN[] = "(";
-static char PAREN_CLOSE[] = ")";
+static const char PAREN_OPEN = '(';
+static const char PAREN_CLOSE = ')';
 
 static const char NOT_WFF[] = "Not well formed formula";
 
@@ -143,11 +143,11 @@ const char *getParenthesisStr(struct TreeNode *tree)
         char op = tree->val;
         if (isOperator(op))
         {
-            concat(buff, PAREN_OPEN);
+            concatchar(buff, PAREN_OPEN);
             concat(buff, getParenthesisStr(tree->left));
             concatchar(buff, op);
             concat(buff, getParenthesisStr(tree->right));
-            concat(buff, PAREN_CLOSE);
+            concatchar(buff, PAREN_CLOSE);
         }
         else
         {
@@ -185,9 +185,9 @@ const char *wff(char *str)
     for (int i = 1; i < length; i++)
     {
         int op = isOperator(str[i]);
-        uniDirCnt += isUniDirOps(str[i]);
-        if (op == lstOprnd && !isUnary(str[i]))
+        if ((op == lstOprnd) != isUnary(str[i]))
             return NOT_WFF;
+        uniDirCnt += isUniDirOps(str[i]);
         if (uniDirCnt > 1)
             return NOT_WFF;
         tree = treeAdd(tree, str[i]);
