@@ -20,10 +20,10 @@ Note-3: The input formula will never contain the truth values “True” and “
 
 #include <stdio.h>
 #include <string.h>
-// importing DSAT Assignment 1 Q no 11
-#include "heap.h"
+// importing DSAT Assignment 1
+#include "tree.h"
 
-static const char OPS_PRECDNCE[] = "~>&|!";
+static const char OPS_PRECDNCE[] = "~>|&!";
 static const char BI_DIR_OPS[] = "~&|";
 static const char UNI_DIR_OPS[] = ">";
 static const char UNIARY_OPS[] = "!";
@@ -76,7 +76,7 @@ int getPrec(char c)
         i++;
     return i;
 } */
-int heapComp(char a, char b)
+int treeComp(char a, char b)
 {
     int opa = isOperator(a);
     int opb = isOperator(b);
@@ -90,18 +90,19 @@ int heapComp(char a, char b)
     }
     return 0;
 }
-const char *getParenthesisStr(struct Heap *heap, int i)
+const char *getParenthesisStr(struct TreeNode *tree)
 {
-    char *buff = (char *)calloc((heap->size * 3), sizeof(char));
-    if (i < heap->size && i > -1)
+    char *buff = "";
+    if (tree != NULL)
     {
-        char op = heap->refArr[i];
+        buff = (char *)calloc((tree->size * 3), sizeof(char));
+        char op = tree->val;
         if (isOperator(op))
         {
             strcat(buff, PAREN_OPEN);
-            strcat(buff, getParenthesisStr(heap, lChild(i)));
+            strcat(buff, getParenthesisStr(tree->left));
             strncat(buff, &op, 1);
-            strcat(buff, getParenthesisStr(heap, rChild(i)));
+            strcat(buff, getParenthesisStr(tree->right));
             strcat(buff, PAREN_CLOSE);
         }
         else
@@ -112,14 +113,14 @@ const char *getParenthesisStr(struct Heap *heap, int i)
 
     return buff;
 }
-const char *addParenthesis(struct Heap *heap)
+const char *addParenthesis(struct TreeNode *tree)
 {
-    if (heap != NULL && heap->size > 0)
+    if (tree != NULL && tree->size > 0)
     {
-        char *buff = (char *)calloc((heap->size * 3), sizeof(char));
-        strcat(buff, getParenthesisStr(heap, lChild(0)));
-        strncat(buff, heap->refArr, 1);
-        strcat(buff, getParenthesisStr(heap, rChild(0)));
+        char *buff = (char *)calloc((tree->size * 3), sizeof(char));
+        strcat(buff, getParenthesisStr(tree->left));
+        strncat(buff, &tree->val, 1);
+        strcat(buff, getParenthesisStr(tree->right));
         return buff;
     }
     return NOT_WFF;
@@ -133,10 +134,10 @@ const char *wff(char *str)
             return NOT_WFF;
         return str;
     }
-    struct Heap *heap = createHeap(length);
     char last = str[0];
     int lstOprnd = isOperator(last);
     int uniDirCnt = isUniDirOps(last);
+    struct TreeNode *tree = treeAdd(NULL, last);
     for (int i = 1; i < length; i++)
     {
         int op = isOperator(str[i]);
@@ -145,16 +146,11 @@ const char *wff(char *str)
             return NOT_WFF;
         if (uniDirCnt > 1)
             return NOT_WFF;
-
+        tree = treeAdd(tree, str[i]);
         last = str[i];
         lstOprnd = op;
     }
-    for (int i = 0; i < length; i++)
-    {
-        addToHeap(heap, str[i]);
-    }
-    show(heap);
-    return addParenthesis(heap);
+    return addParenthesis(tree);
 }
 
 int main()
