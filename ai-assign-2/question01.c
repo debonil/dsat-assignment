@@ -19,9 +19,7 @@ Note-3: The input formula will never contain the truth values “True” and “
 // Submitted by Debonil Ghosh (M21AIE225)
 
 #include <stdio.h>
-#include <string.h>
-// importing DSAT Assignment 1
-#include "tree.h"
+#include <stdlib.h>
 
 static const char OPS_PRECDNCE[] = "~>|&!";
 static const char BI_DIR_OPS[] = "~&|";
@@ -60,22 +58,32 @@ int getPrec(char c)
 {
     return indexOf(OPS_PRECDNCE, c);
 }
-/* int strlen(const char *s)
+int strlength(const char *s)
 {
     int i = 0;
     while (*(s + i) != '\0')
         i++;
     return i;
-} */
-/* const char * strcat(const char *s1,const char *s2)
+}
+const char *concat(char *s1, const char *s2)
 {
-    int l1 = strlen(s1), l2 = strlen(s2);
-    const char * buf = (char *)calloc((l1+l2), sizeof(char));
-    int i = 0;
-    while (*s1!= '\0')
+    int i = 0, j = 0;
+    while (*(s1 + i) != '\0')
         i++;
-    return i;
-} */
+    while (*(s2 + j) != '\0')
+        s1[i + j++] = s2[j];
+    s1[i + j] = '\0';
+    return s1;
+}
+const char *concatchar(char *s1, const char c)
+{
+    int i = 0, j = 0;
+    while (*(s1 + i) != '\0')
+        i++;
+    s1[i] = c;
+    s1[i + 1] = '\0';
+    return s1;
+}
 int treeComp(char a, char b)
 {
     int opa = isOperator(a);
@@ -90,6 +98,42 @@ int treeComp(char a, char b)
     }
     return 0;
 }
+struct TreeNode
+{
+    char val;
+    struct TreeNode *left, *right;
+    int size;
+};
+
+struct TreeNode *createTreeNode(char val)
+{
+    struct TreeNode *tree = (struct TreeNode *)malloc(sizeof(struct TreeNode));
+    tree->left = NULL;
+    tree->right = NULL;
+    tree->val = val;
+    tree->size = 1;
+    return tree;
+}
+struct TreeNode *treeAdd(struct TreeNode *treeNode, char val)
+{
+    if (treeNode == NULL)
+    {
+        return createTreeNode(val);
+    }
+    else if (treeComp(treeNode->val, val))
+    {
+        struct TreeNode *newNode = createTreeNode(val);
+        newNode->left = treeNode;
+        newNode->size += treeNode->size;
+        return newNode;
+    }
+    else
+    {
+        treeNode->right = treeAdd(treeNode->right, val);
+        treeNode->size++;
+        return treeNode;
+    }
+}
 const char *getParenthesisStr(struct TreeNode *tree)
 {
     char *buff = "";
@@ -99,15 +143,15 @@ const char *getParenthesisStr(struct TreeNode *tree)
         char op = tree->val;
         if (isOperator(op))
         {
-            strcat(buff, PAREN_OPEN);
-            strcat(buff, getParenthesisStr(tree->left));
-            strncat(buff, &op, 1);
-            strcat(buff, getParenthesisStr(tree->right));
-            strcat(buff, PAREN_CLOSE);
+            concat(buff, PAREN_OPEN);
+            concat(buff, getParenthesisStr(tree->left));
+            concatchar(buff, op);
+            concat(buff, getParenthesisStr(tree->right));
+            concat(buff, PAREN_CLOSE);
         }
         else
         {
-            strncat(buff, &op, 1);
+            concatchar(buff, op);
         }
     }
 
@@ -118,16 +162,16 @@ const char *addParenthesis(struct TreeNode *tree)
     if (tree != NULL && tree->size > 0)
     {
         char *buff = (char *)calloc((tree->size * 3), sizeof(char));
-        strcat(buff, getParenthesisStr(tree->left));
-        strncat(buff, &tree->val, 1);
-        strcat(buff, getParenthesisStr(tree->right));
+        concat(buff, getParenthesisStr(tree->left));
+        concatchar(buff, tree->val);
+        concat(buff, getParenthesisStr(tree->right));
         return buff;
     }
     return NOT_WFF;
 }
 const char *wff(char *str)
 {
-    int length = strlen(str);
+    int length = strlength(str);
     if (length == 1)
     {
         if (isOperator(str[0]))
