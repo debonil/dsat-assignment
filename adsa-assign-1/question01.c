@@ -44,12 +44,12 @@ struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, int searc
 {
     if (tree == NULL)
     {
-        printf("\t\t      [ %d ] NOT found in Tree! \n", searchVal);
+        printf("NO\n");
         return tree;
     }
     if (tree->val == searchVal)
     {
-        printf("\t\t      [ %d ] found in Tree! \n", searchVal);
+        printf("YES\n");
         return tree;
     }
 
@@ -57,10 +57,6 @@ struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, int searc
         return searchTreeNode(tree->left, searchVal);
     else if (tree->val < searchVal)
         return searchTreeNode(tree->right, searchVal);
-    else
-    {
-        printf("\t\t      [ %d ] not found in the Tree! \n", searchVal);
-    }
     return NULL;
 }
 
@@ -121,7 +117,7 @@ void inorderTravers(struct RedBlackTreeNode *tree)
     if (tree != NULL)
     {
         inorderTravers(tree->left);
-        printf("\t[ %d ] ", tree->val);
+        printf("%d%c ", tree->val, tree->color ? 'B' : 'R');
         inorderTravers(tree->right);
     }
 }
@@ -148,24 +144,24 @@ int main()
 {
     int option = -1, tmp;
     struct RedBlackTreeNode *tree = NULL;
-    while (option != 0)
+    while (option != 5)
     {
-        printf("\nEnter \n 1. to Insert \n 2. to Delete \n 3. to Search elements\n 4. to See Inorder traversal\n 5. to See Preorder traversal\n 6. to See Postorder traversal\n 0. to Exit\n");
+        // printf("\nEnter \n 1. to Insert \n 2. to Delete \n 3. to Search elements\n 4. to See Inorder traversal\n 5. to See Preorder traversal\n 6. to See Postorder traversal\n 0. to Exit\n");
         scanf("%d", &option);
         switch (option)
         {
         case 1:
-            printf("Enter value to insert:\n");
+            // printf("Enter value to insert:\n");
             scanf("%d", &tmp);
             tree = treeAdd(tree, tmp);
             break;
         case 2:
-            printf("Enter value to remove:\n");
+            // printf("Enter value to remove:\n");
             scanf("%d", &tmp);
             tree = treeRemove(tree, tmp);
             break;
         case 3:
-            printf("Enter value to search:\n");
+            // printf("Enter value to search:\n");
             scanf("%d", &tmp);
             searchTreeNode(tree, tmp);
             break;
@@ -173,12 +169,6 @@ int main()
             inorderTravers(tree);
             break;
         case 5:
-            preorderTravers(tree);
-            break;
-        case 6:
-            postorderTravers(tree);
-            break;
-        case 0:
             printf("\n");
             break;
 
@@ -187,6 +177,5 @@ int main()
             break;
         }
     }
-
     return 0;
 }
