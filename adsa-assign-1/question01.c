@@ -9,11 +9,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+enum NodeColor
+{
+    RED,
+    BLACK
+};
+
 struct RedBlackTreeNode
 {
     int val;
-    int color;
-    struct RedBlackTreeNode *left, *right;
+    enum NodeColor color;
+    struct RedBlackTreeNode *left, *right, *parent;
 };
 
 struct RedBlackTreeNode *createTreeNode(int val)
@@ -21,24 +27,153 @@ struct RedBlackTreeNode *createTreeNode(int val)
     struct RedBlackTreeNode *tree = (struct RedBlackTreeNode *)malloc(sizeof(struct RedBlackTreeNode));
     tree->left = NULL;
     tree->right = NULL;
+    tree->color = RED;
     tree->val = val;
     return tree;
 }
 
+struct RedBlackTreeNode *leftRotate(struct RedBlackTreeNode *x, struct RedBlackTreeNode *root)
+{
+    struct RedBlackTreeNode *y = x->right;
+    x->right = y->left;
+    if (y->left != NULL)
+    {
+        y->left->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == NULL)
+        root = y;
+    else if (x == x->parent->left)
+        x->parent->left = y;
+    else
+        x->parent->right = y;
+    y->left = x;
+    x->parent = y;
+    return root;
+}
+
+struct RedBlackTreeNode *rightRotate(struct RedBlackTreeNode *x, struct RedBlackTreeNode *root)
+{
+    struct RedBlackTreeNode *y = x->left;
+    x->left = y->right;
+    if (y->right != NULL)
+    {
+        y->right->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == NULL)
+        root = y;
+    else if (x == x->parent->left)
+        x->parent->left = y;
+    else
+        x->parent->right = y;
+    y->right = x;
+    x->parent = y;
+    return root;
+}
+
+struct RedBlackTreeNode *balanceAfterInsert(struct RedBlackTreeNode *root, struct RedBlackTreeNode *newNode)
+{
+    while (newNode->parent->color == RED)
+    {
+        if (newNode->parent == newNode->parent->parent->right)
+        {
+            struct RedBlackTreeNode *u = newNode->parent->parent->left;
+            if (u != NULL && u->color == RED)
+            {
+                u->color = BLACK;
+                newNode->parent->color = BLACK;
+                newNode->parent->parent->color = RED;
+                newNode = newNode->parent->parent;
+            }
+            else
+            {
+                if (newNode == newNode->parent->left)
+                {
+                    newNode = newNode->parent;
+                    root = rightRotate(newNode, root);
+                }
+                newNode->parent->color = BLACK;
+                newNode->parent->parent->color = RED;
+                root = leftRotate(newNode->parent->parent, root);
+            }
+        }
+        else
+        {
+            struct RedBlackTreeNode *u = newNode->parent->parent->right;
+
+            if (u != NULL && u->color == RED)
+            {
+                u->color = BLACK;
+                newNode->parent->color = BLACK;
+                newNode->parent->parent->color = RED;
+                newNode = newNode->parent->parent;
+            }
+            else
+            {
+                if (newNode == newNode->parent->right)
+                {
+                    newNode = newNode->parent;
+                    root = leftRotate(newNode, root);
+                }
+                newNode->parent->color = BLACK;
+                newNode->parent->parent->color = RED;
+                root = rightRotate(newNode->parent->parent, root);
+            }
+        }
+        if (newNode == root)
+        {
+            break;
+        }
+    }
+    root->color = BLACK;
+    return root;
+}
 struct RedBlackTreeNode *treeAdd(struct RedBlackTreeNode *treeNode, int val)
 {
-    if (treeNode == NULL)
+
+    struct RedBlackTreeNode *y = NULL;
+    struct RedBlackTreeNode *x = treeNode;
+
+    while (x != NULL)
     {
-        printf("\t\t      [ %d ] added to the Tree! \n", val);
-        return createTreeNode(val);
+        y = x;
+        if (val < x->val)
+        {
+            x = x->left;
+        }
+        else if (val > x->val)
+        {
+            x = x->right;
+        }
+        else
+            return treeNode;
     }
 
-    if (val < treeNode->val)
-        treeNode->left = treeAdd(treeNode->left, val);
-    else
-        treeNode->right = treeAdd(treeNode->right, val);
+    struct RedBlackTreeNode *node = createTreeNode(val);
 
-    return treeNode;
+    if (y == NULL)
+    {
+        node->color = BLACK;
+        return node;
+    }
+
+    node->parent = y;
+    if (node->val < y->val)
+    {
+        y->left = node;
+    }
+    else
+    {
+        y->right = node;
+    }
+
+    if (node->parent->parent == NULL)
+    {
+        return treeNode;
+    }
+
+    return balanceAfterInsert(treeNode, node);
 }
 struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, int searchVal)
 {
