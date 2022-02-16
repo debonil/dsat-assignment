@@ -179,7 +179,7 @@ struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, int searc
 {
     if (tree == NULL)
     {
-        printf("NO\n");
+        printf("ABSENT\n");
         return tree;
     }
     if (tree->val == searchVal)
@@ -201,51 +201,164 @@ struct RedBlackTreeNode *smallest(struct RedBlackTreeNode *tree)
         tree = tree->left;
     return tree;
 }
-struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *tree, int searchVal)
-{
-    if (tree == NULL)
-    {
-        printf("\t\t      [ %d ] NOT found in Tree! \n", searchVal);
-        return tree;
-    }
 
-    else if (tree->val > searchVal)
-        tree->left = treeRemove(tree->left, searchVal);
-    else if (tree->val < searchVal)
-        tree->right = treeRemove(tree->right, searchVal);
-    else if (tree->val == searchVal)
+struct RedBlackTreeNode *replace(struct RedBlackTreeNode *u, struct RedBlackTreeNode *v, struct RedBlackTreeNode *root)
+{
+    if (u->parent == NULL)
     {
-        printf("\t\t      [ %d ] found in Tree! \n", tree->val);
-        if (tree->left == NULL && tree->right == NULL)
+        root = v;
+    }
+    else if (u == u->parent->left)
+        u->parent->left = v;
+    else
+        u->parent->right = v;
+    if (v != NULL)
+        v->parent = u->parent;
+    free(u);
+    return root;
+}
+
+struct RedBlackTreeNode *balanceAfterDelete(struct RedBlackTreeNode *x, struct RedBlackTreeNode *root)
+{
+    if (x == NULL)
+        return root;
+    struct RedBlackTreeNode *s;
+    while (x != root && x->color == BLACK)
+    {
+        if (x == x->parent->left)
         {
-            free(tree);
-            return NULL;
-        }
-        else if (tree->right == NULL)
-        {
-            struct RedBlackTreeNode *tmp = tree->left;
-            free(tree);
-            return tmp;
-        }
-        else if (tree->left == NULL)
-        {
-            struct RedBlackTreeNode *tmp = tree->right;
-            free(tree);
-            return tmp;
+            s = x->parent->right;
+            if (s->color == RED)
+            {
+                s->color = BLACK;
+                x->parent->color = RED;
+                root = leftRotate(x->parent, root);
+                s = x->parent->right;
+            }
+
+            if (s->left->color == BLACK && s->right->color == BLACK)
+            {
+                s->color = RED;
+                x = x->parent;
+            }
+            else
+            {
+                if (s->right->color == BLACK)
+                {
+                    s->left->color = BLACK;
+                    s->color = RED;
+                    root = rightRotate(s, root);
+                    s = x->parent->right;
+                }
+
+                s->color = x->parent->color;
+                x->parent->color = BLACK;
+                s->right->color = BLACK;
+                root = leftRotate(x->parent, root);
+                x = root;
+            }
         }
         else
         {
-            struct RedBlackTreeNode *tmp = smallest(tree->right);
-            tree->val = tmp->val;
-            tree->right = treeRemove(tree->right, tmp->val);
+            s = x->parent->left;
+            if (s->color == RED)
+            {
+                s->color = BLACK;
+                x->parent->color = RED;
+                root = rightRotate(x->parent, root);
+                s = x->parent->left;
+            }
+
+            if (s->right->color == BLACK && s->right->color == BLACK)
+            {
+                s->color = RED;
+                x = x->parent;
+            }
+            else
+            {
+                if (s->left->color == BLACK)
+                {
+                    s->right->color = BLACK;
+                    s->color = RED;
+                    root = leftRotate(s, root);
+                    s = x->parent->left;
+                }
+
+                s->color = x->parent->color;
+                x->parent->color = BLACK;
+                s->left->color = BLACK;
+                root = rightRotate(x->parent, root);
+                x = root;
+            }
         }
-        return tree;
+    }
+    x->color = BLACK;
+    return root;
+}
+struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal)
+{
+    struct RedBlackTreeNode *z = NULL, *node = root, *x, *y;
+    while (node != NULL)
+    {
+        if (node->val == searchVal)
+        {
+            z = node;
+        }
+
+        if (node->val <= searchVal)
+        {
+            node = node->right;
+        }
+        else
+        {
+            node = node->left;
+        }
+    }
+
+    if (z == NULL)
+    {
+        printf("ABSENT\n");
+        return root;
+    }
+
+    y = z;
+    enum NodeColor yOriginalColor = y->color;
+    if (z->left == NULL)
+    {
+        x = z->right;
+        root = replace(z, z->right, root);
+    }
+    else if (z->right == NULL)
+    {
+        x = z->left;
+        root = replace(z, z->left, root);
     }
     else
     {
-        printf("\t\t      [ %d ] not found in the Tree! \n", searchVal);
+        y = smallest(z->right);
+        yOriginalColor = y->color;
+        x = y->right;
+        if (y->parent == z)
+        {
+            // x->parent = y;
+        }
+        else
+        {
+            root = replace(y, y->right, root);
+            y->right = z->right;
+            y->right->parent = y;
+        }
+
+        root = replace(z, y, root);
+        y->left = z->left;
+        y->left->parent = y;
+        y->color = z->color;
     }
-    return tree;
+    if (yOriginalColor == BLACK)
+    {
+        root = balanceAfterDelete(x, root);
+    }
+    return root;
 }
 void inorderTravers(struct RedBlackTreeNode *tree)
 {
@@ -302,13 +415,14 @@ int main()
             break;
         case 4:
             inorderTravers(tree);
+            printf("\n");
             break;
         case 5:
-            printf("\n");
+            // printf("\n");
             break;
 
         default:
-            printf("Enter valid option..\n");
+            // printf("Enter valid option..\n");
             break;
         }
     }
