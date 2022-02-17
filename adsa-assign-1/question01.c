@@ -217,80 +217,83 @@ struct RedBlackTreeNode *replace(struct RedBlackTreeNode *u, struct RedBlackTree
     free(u);
     return root;
 }
-
-struct RedBlackTreeNode *balanceAfterDelete(struct RedBlackTreeNode *x, struct RedBlackTreeNode *root)
+int isBlack(struct RedBlackTreeNode *x)
 {
-    if (x == NULL)
-        return root;
+    return x == NULL || x->color == BLACK;
+}
+struct RedBlackTreeNode *balanceAfterDelete(struct RedBlackTreeNode *x, struct RedBlackTreeNode *xParent, struct RedBlackTreeNode *root)
+{
     struct RedBlackTreeNode *s;
-    while (x != root && x->color == BLACK)
+    while (x != root && isBlack(x))
     {
-        if (x == x->parent->left)
+        if (x == xParent->left)
         {
-            s = x->parent->right;
+            s = xParent->right;
             if (s->color == RED)
             {
                 s->color = BLACK;
-                x->parent->color = RED;
-                root = leftRotate(x->parent, root);
-                s = x->parent->right;
+                xParent->color = RED;
+                root = leftRotate(xParent, root);
+                s = xParent->right;
             }
 
-            if (s->left->color == BLACK && s->right->color == BLACK)
+            if (isBlack(s->left) && isBlack(s->right))
             {
                 s->color = RED;
-                x = x->parent;
+                x = xParent;
             }
             else
             {
-                if (s->right->color == BLACK)
+                if (isBlack(s->right))
                 {
                     s->left->color = BLACK;
                     s->color = RED;
                     root = rightRotate(s, root);
-                    s = x->parent->right;
+                    s = xParent->right;
                 }
 
-                s->color = x->parent->color;
-                x->parent->color = BLACK;
+                s->color = xParent->color;
+                xParent->color = BLACK;
                 s->right->color = BLACK;
-                root = leftRotate(x->parent, root);
+                root = leftRotate(xParent, root);
                 x = root;
             }
         }
         else
         {
-            s = x->parent->left;
+            s = xParent->left;
             if (s->color == RED)
             {
                 s->color = BLACK;
-                x->parent->color = RED;
-                root = rightRotate(x->parent, root);
-                s = x->parent->left;
+                xParent->color = RED;
+                root = rightRotate(xParent, root);
+                s = xParent->left;
             }
 
-            if (s->right->color == BLACK && s->right->color == BLACK)
+            if (isBlack(s->left) && isBlack(s->right))
             {
                 s->color = RED;
-                x = x->parent;
+                x = xParent;
             }
             else
             {
-                if (s->left->color == BLACK)
+                if (isBlack(s->left))
                 {
                     s->right->color = BLACK;
                     s->color = RED;
                     root = leftRotate(s, root);
-                    s = x->parent->left;
+                    s = xParent->left;
                 }
 
-                s->color = x->parent->color;
-                x->parent->color = BLACK;
+                s->color = xParent->color;
+                xParent->color = BLACK;
                 s->left->color = BLACK;
-                root = rightRotate(x->parent, root);
+                root = rightRotate(xParent, root);
                 x = root;
             }
         }
+        if (x != NULL)
+            xParent = x->parent;
     }
     x->color = BLACK;
     return root;
@@ -356,7 +359,7 @@ struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal
     }
     if (yOriginalColor == BLACK)
     {
-        root = balanceAfterDelete(x, root);
+        root = balanceAfterDelete(x, y, root);
     }
     return root;
 }
