@@ -175,8 +175,13 @@ struct RedBlackTreeNode *treeAdd(struct RedBlackTreeNode *treeNode, int val)
 
     return balanceAfterInsert(treeNode, node);
 }
-struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, int searchVal)
+struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, struct RedBlackTreeNode *root, int searchVal)
 {
+    if (root == NULL)
+    {
+        printf("EMPTY\n");
+        return tree;
+    }
     if (tree == NULL)
     {
         printf("ABSENT\n");
@@ -184,14 +189,14 @@ struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, int searc
     }
     if (tree->val == searchVal)
     {
-        printf("YES\n");
+        printf("PRESENT\n");
         return tree;
     }
 
     else if (tree->val > searchVal)
-        return searchTreeNode(tree->left, searchVal);
+        return searchTreeNode(tree->left, root, searchVal);
     else if (tree->val < searchVal)
-        return searchTreeNode(tree->right, searchVal);
+        return searchTreeNode(tree->right, root, searchVal);
     return NULL;
 }
 
@@ -300,6 +305,11 @@ struct RedBlackTreeNode *balanceAfterDelete(struct RedBlackTreeNode *x, struct R
 }
 struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal)
 {
+    if (root == NULL)
+    {
+        printf("EMPTY\n");
+        return root;
+    }
     struct RedBlackTreeNode *z = NULL, *node = root, *x, *y;
     while (node != NULL)
     {
@@ -402,19 +412,19 @@ int main()
         switch (option)
         {
         case 1:
-            // printf("Enter value to insert:\n");
+            printf("Enter value to insert:\n");
             scanf("%d", &tmp);
             tree = treeAdd(tree, tmp);
             break;
         case 2:
-            // printf("Enter value to remove:\n");
+            printf("Enter value to remove:\n");
             scanf("%d", &tmp);
             tree = treeRemove(tree, tmp);
             break;
         case 3:
-            // printf("Enter value to search:\n");
+            printf("Enter value to search:\n");
             scanf("%d", &tmp);
-            searchTreeNode(tree, tmp);
+            searchTreeNode(tree, tree, tmp);
             break;
         case 4:
             inorderTravers(tree);
