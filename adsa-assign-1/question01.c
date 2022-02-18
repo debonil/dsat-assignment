@@ -219,7 +219,6 @@ struct RedBlackTreeNode *replace(struct RedBlackTreeNode *u, struct RedBlackTree
         u->parent->right = v;
     if (v != NULL)
         v->parent = u->parent;
-    free(u);
     return root;
 }
 int isBlack(struct RedBlackTreeNode *x)
@@ -310,7 +309,7 @@ struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal
         printf("EMPTY\n");
         return root;
     }
-    struct RedBlackTreeNode *z = NULL, *node = root, *x, *y;
+    struct RedBlackTreeNode *z = NULL, *node = root, *x, *y, *xparent;
     while (node != NULL)
     {
         if (node->val == searchVal)
@@ -340,11 +339,13 @@ struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal
     {
         x = z->right;
         root = replace(z, z->right, root);
+        xparent = z->parent;
     }
     else if (z->right == NULL)
     {
         x = z->left;
         root = replace(z, z->left, root);
+        xparent = z->parent;
     }
     else
     {
@@ -353,10 +354,11 @@ struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal
         x = y->right;
         if (y->parent == z)
         {
-            // x->parent = y;
+            xparent = y;
         }
         else
         {
+            xparent = y->parent;
             root = replace(y, y->right, root);
             y->right = z->right;
             y->right->parent = y;
@@ -369,8 +371,9 @@ struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal
     }
     if (yOriginalColor == BLACK)
     {
-        root = balanceAfterDelete(x, y, root);
+        root = balanceAfterDelete(x, xparent, root);
     }
+    free(z);
     return root;
 }
 void inorderTravers(struct RedBlackTreeNode *tree)
@@ -412,17 +415,22 @@ int main()
         switch (option)
         {
         case 1:
-            printf("Enter value to insert:\n");
+            // printf("Enter value to insert:\n");
             scanf("%d", &tmp);
             tree = treeAdd(tree, tmp);
             break;
         case 2:
-            printf("Enter value to remove:\n");
+            // printf("Enter value to remove:\n");
+            if (tree == NULL)
+            {
+                printf("EMPTY\n");
+                break;
+            }
             scanf("%d", &tmp);
             tree = treeRemove(tree, tmp);
             break;
         case 3:
-            printf("Enter value to search:\n");
+            // printf("Enter value to search:\n");
             scanf("%d", &tmp);
             searchTreeNode(tree, tree, tmp);
             break;
