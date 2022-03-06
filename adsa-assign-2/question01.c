@@ -1,8 +1,7 @@
-/* Q. Implement the following operations in Red Black Tree
-        a. Insertion
-        b. Deletion
-        c. Search
-        d. Display Tree
+/* 1) Implement the following operations in Open Interval Tree :
+    a. Insertion.
+    b. Deletion.
+    c. Print inorder traversal.
 */
 // Submitted by Debonil Ghosh (M21AIE225)
 
