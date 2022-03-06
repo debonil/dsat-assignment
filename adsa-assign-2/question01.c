@@ -15,16 +15,16 @@ enum NodeColor
     BLACK
 };
 
-struct RedBlackTreeNode
+struct IntervalTreeNode
 {
     int low, high, max;
     enum NodeColor color;
-    struct RedBlackTreeNode *left, *right, *parent;
+    struct IntervalTreeNode *left, *right, *parent;
 };
 
-struct RedBlackTreeNode *createTreeNode(int low, int high)
+struct IntervalTreeNode *createTreeNode(int low, int high)
 {
-    struct RedBlackTreeNode *tree = (struct RedBlackTreeNode *)malloc(sizeof(struct RedBlackTreeNode));
+    struct IntervalTreeNode *tree = (struct IntervalTreeNode *)malloc(sizeof(struct IntervalTreeNode));
     tree->left = NULL;
     tree->right = NULL;
     tree->color = RED;
@@ -34,9 +34,9 @@ struct RedBlackTreeNode *createTreeNode(int low, int high)
     return tree;
 }
 
-struct RedBlackTreeNode *leftRotate(struct RedBlackTreeNode *x, struct RedBlackTreeNode *root)
+struct IntervalTreeNode *leftRotate(struct IntervalTreeNode *x, struct IntervalTreeNode *root)
 {
-    struct RedBlackTreeNode *y = x->right;
+    struct IntervalTreeNode *y = x->right;
     x->right = y->left;
     if (y->left != NULL)
     {
@@ -54,9 +54,9 @@ struct RedBlackTreeNode *leftRotate(struct RedBlackTreeNode *x, struct RedBlackT
     return root;
 }
 
-struct RedBlackTreeNode *rightRotate(struct RedBlackTreeNode *x, struct RedBlackTreeNode *root)
+struct IntervalTreeNode *rightRotate(struct IntervalTreeNode *x, struct IntervalTreeNode *root)
 {
-    struct RedBlackTreeNode *y = x->left;
+    struct IntervalTreeNode *y = x->left;
     x->left = y->right;
     if (y->right != NULL)
     {
@@ -74,13 +74,13 @@ struct RedBlackTreeNode *rightRotate(struct RedBlackTreeNode *x, struct RedBlack
     return root;
 }
 
-struct RedBlackTreeNode *balanceAfterInsert(struct RedBlackTreeNode *root, struct RedBlackTreeNode *newNode)
+struct IntervalTreeNode *balanceAfterInsert(struct IntervalTreeNode *root, struct IntervalTreeNode *newNode)
 {
     while (newNode->parent->color == RED)
     {
         if (newNode->parent == newNode->parent->parent->right)
         {
-            struct RedBlackTreeNode *u = newNode->parent->parent->left;
+            struct IntervalTreeNode *u = newNode->parent->parent->left;
             if (u != NULL && u->color == RED)
             {
                 u->color = BLACK;
@@ -102,7 +102,7 @@ struct RedBlackTreeNode *balanceAfterInsert(struct RedBlackTreeNode *root, struc
         }
         else
         {
-            struct RedBlackTreeNode *u = newNode->parent->parent->right;
+            struct IntervalTreeNode *u = newNode->parent->parent->right;
 
             if (u != NULL && u->color == RED)
             {
@@ -132,27 +132,33 @@ struct RedBlackTreeNode *balanceAfterInsert(struct RedBlackTreeNode *root, struc
     return root;
 }
 
-void computeMaxAfterInsert(struct RedBlackTreeNode *node)
+void computeMaxAfterInsert(struct IntervalTreeNode *node)
 {
     if (node->parent != NULL && node->max > node->parent->max)
     {
         node->parent->max = node->max;
-        computeMax(node->parent);
+        computeMaxAfterInsert(node->parent);
     }
 }
-void computeMaxAfterDeletion(struct RedBlackTreeNode *node)
+void computeMaxAfterDelete(struct IntervalTreeNode *node)
 {
-    if (node->parent != NULL && node->max = node->parent->max)
+    if (node != NULL)
     {
-        node->parent->max = node->max;
-        computeMax(node->parent);
+        int newMax = node->high;
+        if (node->left != NULL && node->left->max > newMax)
+            newMax = node->left->max;
+        if (node->right != NULL && node->right->max > newMax)
+            newMax = node->right->max;
+        node->max = newMax;
+        if (node->parent != NULL && node->parent->max <= newMax)
+            computeMaxAfterDelete(node->parent);
     }
 }
-struct RedBlackTreeNode *treeAdd(struct RedBlackTreeNode *treeNode, int low, int high)
+struct IntervalTreeNode *treeAdd(struct IntervalTreeNode *treeNode, int low, int high)
 {
 
-    struct RedBlackTreeNode *y = NULL;
-    struct RedBlackTreeNode *x = treeNode;
+    struct IntervalTreeNode *y = NULL;
+    struct IntervalTreeNode *x = treeNode;
 
     while (x != NULL)
     {
@@ -169,7 +175,7 @@ struct RedBlackTreeNode *treeAdd(struct RedBlackTreeNode *treeNode, int low, int
             return treeNode;
     }
 
-    struct RedBlackTreeNode *node = createTreeNode(low, high);
+    struct IntervalTreeNode *node = createTreeNode(low, high);
 
     if (y == NULL)
     {
@@ -192,10 +198,10 @@ struct RedBlackTreeNode *treeAdd(struct RedBlackTreeNode *treeNode, int low, int
         return treeNode;
     }
     treeNode = balanceAfterInsert(treeNode, node);
-    computeMax(node);
+    computeMaxAfterInsert(node);
     return treeNode;
 }
-struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, struct RedBlackTreeNode *root, int searchVal)
+struct IntervalTreeNode *searchTreeNode(struct IntervalTreeNode *tree, struct IntervalTreeNode *root, int searchVal)
 {
     if (root == NULL)
     {
@@ -220,14 +226,14 @@ struct RedBlackTreeNode *searchTreeNode(struct RedBlackTreeNode *tree, struct Re
     return NULL;
 }
 
-struct RedBlackTreeNode *smallest(struct RedBlackTreeNode *tree)
+struct IntervalTreeNode *smallest(struct IntervalTreeNode *tree)
 {
     while (tree && tree->left != NULL)
         tree = tree->left;
     return tree;
 }
 
-struct RedBlackTreeNode *replace(struct RedBlackTreeNode *u, struct RedBlackTreeNode *v, struct RedBlackTreeNode *root)
+struct IntervalTreeNode *replace(struct IntervalTreeNode *u, struct IntervalTreeNode *v, struct IntervalTreeNode *root)
 {
     if (u->parent == NULL)
     {
@@ -241,13 +247,13 @@ struct RedBlackTreeNode *replace(struct RedBlackTreeNode *u, struct RedBlackTree
         v->parent = u->parent;
     return root;
 }
-int isBlack(struct RedBlackTreeNode *x)
+int isBlack(struct IntervalTreeNode *x)
 {
     return x == NULL || x->color == BLACK;
 }
-struct RedBlackTreeNode *balanceAfterDelete(struct RedBlackTreeNode *x, struct RedBlackTreeNode *xParent, struct RedBlackTreeNode *root)
+struct IntervalTreeNode *balanceAfterDelete(struct IntervalTreeNode *x, struct IntervalTreeNode *xParent, struct IntervalTreeNode *root)
 {
-    struct RedBlackTreeNode *s;
+    struct IntervalTreeNode *s;
     while (x != root && isBlack(x))
     {
         if (x == xParent->left)
@@ -322,22 +328,22 @@ struct RedBlackTreeNode *balanceAfterDelete(struct RedBlackTreeNode *x, struct R
     x->color = BLACK;
     return root;
 }
-struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal)
+struct IntervalTreeNode *treeRemove(struct IntervalTreeNode *root, int searchValLeft, int searchValRight)
 {
     if (root == NULL)
     {
         printf("EMPTY\n");
         return root;
     }
-    struct RedBlackTreeNode *z = NULL, *node = root, *x, *y, *xparent;
+    struct IntervalTreeNode *z = NULL, *node = root, *x, *y, *xparent;
     while (node != NULL)
     {
-        if (node->low == searchVal)
+        if (node->low == searchValLeft)
         {
             z = node;
         }
 
-        if (node->low <= searchVal)
+        if (node->low <= searchValLeft)
         {
             node = node->right;
         }
@@ -391,21 +397,23 @@ struct RedBlackTreeNode *treeRemove(struct RedBlackTreeNode *root, int searchVal
     }
     if (yOriginalColor == BLACK)
     {
-        root = balanceAfterDelete(x, xparent, root);
+        // root = balanceAfterDelete(x, xparent, root);
     }
+    computeMaxAfterDelete(xparent);
     free(z);
     return root;
 }
-void inorderTravers(struct RedBlackTreeNode *tree)
+void inorderTravers(struct IntervalTreeNode *tree)
 {
     if (tree != NULL)
     {
         inorderTravers(tree->left);
-        printf("(%d,%d)|%d|%c ", tree->low, tree->high, tree->max, tree->color ? 'B' : 'R');
+        // printf("(%d,%d)|%d|%c ", tree->low, tree->high, tree->max, tree->color ? 'B' : 'R');
+        printf("%d %d %d\n", tree->low, tree->high, tree->max);
         inorderTravers(tree->right);
     }
 }
-void preorderTravers(struct RedBlackTreeNode *tree)
+void preorderTravers(struct IntervalTreeNode *tree)
 {
     if (tree != NULL)
     {
@@ -414,7 +422,7 @@ void preorderTravers(struct RedBlackTreeNode *tree)
         preorderTravers(tree->right);
     }
 }
-void postorderTravers(struct RedBlackTreeNode *tree)
+void postorderTravers(struct IntervalTreeNode *tree)
 {
     if (tree != NULL)
     {
@@ -427,8 +435,8 @@ void postorderTravers(struct RedBlackTreeNode *tree)
 int main()
 {
     int option = -1, tmp, tmp2;
-    struct RedBlackTreeNode *tree = NULL;
-    while (option != 5)
+    struct IntervalTreeNode *tree = NULL;
+    while (option != 4)
     {
         // printf("\nEnter \n 1. to Insert \n 2. to Delete \n 3. to Search elements\n 4. to See Inorder traversal\n 5. to See Preorder traversal\n 6. to See Postorder traversal\n 0. to Exit\n");
         scanf("%d", &option);
@@ -448,18 +456,14 @@ int main()
                 break;
             }
             scanf("%d", &tmp);
-            tree = treeRemove(tree, tmp);
+            scanf("%d", &tmp2);
+            tree = treeRemove(tree, tmp, tmp2);
             break;
         case 3:
-            // printf("Enter value to search:\n");
-            scanf("%d", &tmp);
-            searchTreeNode(tree, tree, tmp);
+            inorderTravers(tree);
+            // printf("\n");
             break;
         case 4:
-            inorderTravers(tree);
-            printf("\n");
-            break;
-        case 5:
             // printf("\n");
             break;
 
