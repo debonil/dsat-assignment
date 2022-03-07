@@ -79,3 +79,29 @@ int main()
     printf("%d\n", binarySearchGap(arr, si, ei));
     return 0;
 }
+int mainNaive()
+{
+    int n, s, e, arr[100], si = -1, missing;
+    scanf("%d", &n);
+    scanf("%d", &s);
+    scanf("%d", &e);
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", &arr[i]);
+    }
+    missing = s;
+    for (int i = 0; i < n; i++)
+    {
+        if (arr[i] == s)
+            si = i;
+        if (arr[i] == e)
+            si = -1;
+        if (si > -1 && i > si)
+        {
+            if ((i - si) == (arr[i] - s))
+                missing++;
+        }
+    }
+    printf("%d\n", (missing + 1));
+    return 0;
+}
