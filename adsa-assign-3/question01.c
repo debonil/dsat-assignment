@@ -54,35 +54,35 @@ struct BTree *createBTree(int order)
     tree->root->isLeaf = 1;
     return tree;
 }
-void splitNode(struct BTree *tree, struct BTreeNode *x, int pos, struct BTreeNode *y)
+void splitNode(struct BTree *tree, struct BTreeNode *parent, int splitIndex, struct BTreeNode *child)
 {
-    struct BTreeNode *z = createBTreeNode(tree);
-    z->isLeaf = y->isLeaf;
-    z->size = tree->order - 1;
+    struct BTreeNode *anotherChild = createBTreeNode(tree);
+    anotherChild->isLeaf = child->isLeaf;
+    anotherChild->size = tree->order - 1;
     for (int j = 0; j < tree->order - 1; j++)
     {
-        z->keys[j] = y->keys[j + tree->order];
+        anotherChild->keys[j] = child->keys[j + tree->order];
     }
-    if (!y->isLeaf)
+    if (!child->isLeaf)
     {
         for (int j = 0; j < tree->order; j++)
         {
-            z->children[j] = y->children[j + tree->order];
+            anotherChild->children[j] = child->children[j + tree->order];
         }
     }
-    y->size = tree->order - 1;
-    for (int j = x->size; j >= pos + 1; j--)
+    child->size = tree->order - 1;
+    for (int j = parent->size; j >= splitIndex + 1; j--)
     {
-        x->children[j + 1] = x->children[j];
+        parent->children[j + 1] = parent->children[j];
     }
-    x->children[pos + 1] = z;
+    parent->children[splitIndex + 1] = anotherChild;
 
-    for (int j = x->size - 1; j >= pos; j--)
+    for (int j = parent->size - 1; j >= splitIndex; j--)
     {
-        x->keys[j + 1] = x->keys[j];
+        parent->keys[j + 1] = parent->keys[j];
     }
-    x->keys[pos] = y->keys[tree->order - 1];
-    x->size = x->size + 1;
+    parent->keys[splitIndex] = child->keys[tree->order - 1];
+    parent->size = parent->size + 1;
 }
 
 void insertValueIntoTree(struct BTree *tree, struct BTreeNode *node, int value)
@@ -211,7 +211,7 @@ void removeNode(struct BTree *tree, struct BTreeNode *node, int key)
             int predKey = 0;
             if (pred->size >= tree->order)
             {
-                for (;;)
+                while (1)
                 {
                     if (pred->isLeaf)
                     {
@@ -235,7 +235,7 @@ void removeNode(struct BTree *tree, struct BTreeNode *node, int key)
                 if (!nextNode->isLeaf)
                 {
                     nextNode = nextNode->children[0];
-                    for (;;)
+                    while (1)
                     {
                         if (nextNode->isLeaf)
                         {
